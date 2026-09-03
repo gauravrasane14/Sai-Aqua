@@ -103,7 +103,7 @@ const DB = (() => {
   }
 
   async function getAllProducts() {
-    return await db.products.where('isActive').equals(1).toArray();
+    return await db.products.filter(p => p.isActive !== false).toArray();
   }
 
   async function getAllProductsIncludingInactive() {

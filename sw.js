@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sai-aqua-v1';
+const CACHE_NAME = 'sai-aqua-v2';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -15,7 +15,7 @@ const ASSETS_TO_CACHE = [
   'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap',
   'https://unpkg.com/dexie@4.0.11/dist/dexie.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js',
-  'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js'
+  'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'
 ];
 
 // Install — cache all app assets
