@@ -425,6 +425,7 @@ const Invoice = (() => {
         <div class="inv-footer">
           <div class="inv-thankyou">Thank you for your business!</div>
           <div class="inv-footer-note">${biz.name} • ${biz.mobile}</div>
+          <div class="inv-developer-credit">Designed, Developed & Maintained by <a href="https://www.linkedin.com/in/gauravrasane14/" target="_blank" rel="noopener">Gaurav Rasane</a> (<a href="https://wa.me/+917620984926" target="_blank" rel="noopener">76209 84926</a>)</div>
         </div>
       </div>
     `;

@@ -1,6 +1,6 @@
 /* ================================================================
    SAI AQUA — Main Application Controller
-   Navigation, routing, dashboard, initialization
+   Navigation, routing, dashboard, settings, initialization
    ================================================================ */
 
 const App = (() => {
@@ -13,11 +13,16 @@ const App = (() => {
       // Initialize database
       await DB.init();
 
+      // Initialize auth (checks password / shows login if needed)
+      const authenticated = await Auth.init();
+
       // Set up navigation listeners
       setupNavigation();
 
-      // Load dashboard
-      await navigateTo('dashboard');
+      // Only load dashboard if already authenticated
+      if (authenticated) {
+        await navigateTo('dashboard');
+      }
 
       // Register service worker
       registerServiceWorker();
@@ -40,6 +45,12 @@ const App = (() => {
   }
 
   async function navigateTo(screenName) {
+    const isAuth = await Auth.isAuthenticated();
+    if (!isAuth) {
+      Auth.showLoginScreen();
+      return;
+    }
+
     currentScreen = screenName;
 
     // Hide all screens
@@ -70,6 +81,9 @@ const App = (() => {
         break;
       case 'products':
         await Products.renderList();
+        break;
+      case 'settings':
+        await renderSettings();
         break;
     }
   }
@@ -125,8 +139,8 @@ const App = (() => {
         <button class="btn btn-secondary btn-block" onclick="App.navigateTo('customers')" style="justify-content: flex-start;">
           👥 Customers
         </button>
-        <button class="btn btn-secondary btn-block" onclick="App.navigateTo('products')" style="justify-content: flex-start;">
-          📦 Products
+        <button class="btn btn-secondary btn-block" onclick="App.navigateTo('settings')" style="justify-content: flex-start;">
+          ⚙️ Settings
         </button>
       </div>
     `;
@@ -165,6 +179,134 @@ const App = (() => {
     }).join('');
   }
 
+  // ── Settings Screen ────────────────────────────────────────────
+  async function renderSettings() {
+    const screen = document.getElementById('screen-settings');
+    const passwordEnabled = await Auth.isPasswordEnabled();
+
+    screen.innerHTML = `
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Settings</h2>
+          <div class="section-subtitle">App configuration</div>
+        </div>
+      </div>
+
+      <!-- Password Settings -->
+      <div class="card" style="margin-bottom: var(--space-lg);">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-base);">
+          <div>
+            <div style="font-weight: 600; font-size: var(--font-base);">🔒 Password Lock</div>
+            <div style="font-size: var(--font-sm); color: var(--text-secondary);">Require password to open app</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="settings-password-toggle" ${passwordEnabled ? 'checked' : ''} onchange="App.togglePassword(this.checked)">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div id="password-settings-section" style="${passwordEnabled ? '' : 'display:none;'}">
+          <div class="divider" style="margin: var(--space-md) 0;"></div>
+          <button class="btn btn-secondary btn-block btn-sm" onclick="App.showChangePassword()">
+            🔑 Change Password
+          </button>
+
+          <div id="change-password-form" style="display:none; margin-top: var(--space-base);">
+            <div class="form-group">
+              <label class="form-label">Current Password</label>
+              <input type="password" id="settings-current-pass" class="form-input" placeholder="Current password">
+            </div>
+            <div class="form-group">
+              <label class="form-label">New Password</label>
+              <input type="password" id="settings-new-pass" class="form-input" placeholder="New password (min 4 chars)">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Confirm New Password</label>
+              <input type="password" id="settings-confirm-pass" class="form-input" placeholder="Confirm new password">
+            </div>
+            <button class="btn btn-primary btn-block btn-sm" onclick="App.handleChangePassword()">
+              ✓ Update Password
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Products -->
+      <div class="list-item" onclick="App.navigateTo('products')" style="margin-bottom: var(--space-sm);">
+        <div class="item-avatar accent">📦</div>
+        <div class="item-content">
+          <div class="item-title">Products</div>
+          <div class="item-subtitle">Manage water jar products & rates</div>
+        </div>
+        <div style="color: var(--text-muted); font-size: 1.2rem;">›</div>
+      </div>
+
+      <!-- Logout -->
+      <div class="list-item" onclick="Auth.logout()" style="margin-bottom: var(--space-lg);">
+        <div class="item-avatar" style="background: var(--red-dim); color: var(--red);">🚪</div>
+        <div class="item-content">
+          <div class="item-title" style="color: var(--red);">Logout</div>
+          <div class="item-subtitle">Lock the app</div>
+        </div>
+      </div>
+
+      <!-- App Info -->
+      <div class="card" style="text-align: center; padding: var(--space-xl);">
+        <div style="font-size: var(--font-lg); font-weight: 800; background: var(--gradient-accent); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: var(--space-xs);">
+          SAI AQUA
+        </div>
+        <div style="font-size: var(--font-sm); color: var(--text-secondary);">
+          Purified Water Jar Suppliers<br>Invoice Manager
+        </div>
+      </div>
+    `;
+  }
+
+  // ── Toggle Password Lock ───────────────────────────────────────
+  async function togglePassword(enabled) {
+    await Auth.setPasswordEnabled(enabled);
+    const section = document.getElementById('password-settings-section');
+    if (section) {
+      section.style.display = enabled ? '' : 'none';
+    }
+    Utils.showToast(enabled ? 'Password lock enabled' : 'Password lock disabled', 'success');
+  }
+
+  // ── Show Change Password Form ──────────────────────────────────
+  function showChangePassword() {
+    const form = document.getElementById('change-password-form');
+    if (form) {
+      form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    }
+  }
+
+  // ── Handle Password Change ─────────────────────────────────────
+  async function handleChangePassword() {
+    const current = document.getElementById('settings-current-pass').value;
+    const newPass = document.getElementById('settings-new-pass').value;
+    const confirm = document.getElementById('settings-confirm-pass').value;
+
+    if (!current) {
+      Utils.showToast('Enter current password', 'error');
+      return;
+    }
+    if (newPass !== confirm) {
+      Utils.showToast('New passwords do not match', 'error');
+      return;
+    }
+
+    const result = await Auth.changePassword(current, newPass);
+    if (result.success) {
+      Utils.showToast(result.message, 'success');
+      document.getElementById('settings-current-pass').value = '';
+      document.getElementById('settings-new-pass').value = '';
+      document.getElementById('settings-confirm-pass').value = '';
+      document.getElementById('change-password-form').style.display = 'none';
+    } else {
+      Utils.showToast(result.message, 'error');
+    }
+  }
+
   // ── Service Worker Registration ────────────────────────────────
   function registerServiceWorker() {
     if ('serviceWorker' in navigator) {
@@ -179,7 +321,11 @@ const App = (() => {
   return {
     init,
     navigateTo,
-    renderDashboard
+    renderDashboard,
+    renderSettings,
+    togglePassword,
+    showChangePassword,
+    handleChangePassword
   };
 })();
 

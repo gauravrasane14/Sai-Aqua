@@ -1,10 +1,11 @@
-const CACHE_NAME = 'sai-aqua-v2';
+const CACHE_NAME = 'sai-aqua-v4';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
   '/css/styles.css',
   '/js/app.js',
   '/js/db.js',
+  '/js/auth.js',
   '/js/utils.js',
   '/js/invoice.js',
   '/js/share.js',

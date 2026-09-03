@@ -1,7 +1,7 @@
 {
   "name": "Sai Aqua — Invoice Manager",
   "short_name": "Sai Aqua",
-  "description": "Create and share professional purified water jar invoices instantly",
+  "description": "Create and share professional purified water jar invoices instantly from your phone.",
   "start_url": "/index.html",
   "display": "standalone",
   "background_color": "#0f1729",
