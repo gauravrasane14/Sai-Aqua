@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0f1729">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="description" content="Sai Aqua — Create and share professional purified water jar invoices instantly from your phone.">
+  <meta name="mobile-web-app-capable" content="yes">
+
+  <title>Sai Aqua — Invoice Manager</title>
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230a0f1e'/%3E%3Ctext x='50' y='65' font-family='Arial' font-size='50' font-weight='bold' fill='%2300d4aa' text-anchor='middle'%3ESA%3C/text%3E%3C/svg%3E">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="app-container">
+
+    <!-- ═══ Header ═══ -->
+    <header class="app-header">
+      <div class="logo">
+        <div class="logo-icon">SA</div>
+        <span class="logo-text">Sai Aqua</span>
+      </div>
+      <button class="header-action" onclick="App.navigateTo('products')" title="Products">
+        ⚙
+      </button>
+    </header>
+
+    <!-- ═══ Screen Container ═══ -->
+    <main class="screen-container">
+
+      <!-- Dashboard Screen -->
+      <div id="screen-dashboard" class="screen active">
+        <!-- Rendered by App.renderDashboard() -->
+      </div>
+
+      <!-- Invoice Screen (Create + Success + View) -->
+      <div id="screen-invoice" class="screen">
+        <!-- Rendered by Invoice.renderCreateForm() -->
+      </div>
+
+      <!-- Customers Screen -->
+      <div id="screen-customers" class="screen">
+        <!-- Rendered by Customers.renderList() -->
+      </div>
+
+      <!-- Invoice History Screen -->
+      <div id="screen-history" class="screen">
+        <!-- Rendered by History.renderList() -->
+      </div>
+
+      <!-- Products Screen (accessed from settings) -->
+      <div id="screen-products" class="screen">
+        <!-- Rendered by Products.renderList() -->
+      </div>
+
+    </main>
+
+    <!-- ═══ Bottom Navigation ═══ -->
+    <nav class="bottom-nav">
+      <button class="nav-item active" data-screen="dashboard">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-label">Home</span>
+      </button>
+      <button class="nav-item" data-screen="customers">
+        <span class="nav-icon">👥</span>
+        <span class="nav-label">Customers</span>
+      </button>
+      <button class="nav-item nav-create" data-screen="invoice">
+        <span class="nav-icon">＋</span>
+        <span class="nav-label">Invoice</span>
+      </button>
+      <button class="nav-item" data-screen="history">
+        <span class="nav-icon">📋</span>
+        <span class="nav-label">Invoices</span>
+      </button>
+      <button class="nav-item" data-screen="products">
+        <span class="nav-icon">📦</span>
+        <span class="nav-label">Products</span>
+      </button>
+    </nav>
+
+    <!-- ═══ Hidden Invoice Renderer (for html2canvas capture) ═══ -->
+    <div id="invoice-renderer" class="invoice-renderer"></div>
+
+    <!-- ═══ Toast Container ═══ -->
+    <div id="toast-container" class="toast-container"></div>
+
+  </div>
+
+  <!-- ═══ External Libraries (CDN) ═══ -->
+  <!-- Dexie.js — IndexedDB wrapper -->
+  <script src="https://unpkg.com/dexie@4.0.11/dist/dexie.min.js"></script>
+  <!-- html2canvas — DOM to canvas -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <!-- jsPDF — PDF generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
+
+  <!-- ═══ App Modules (order matters: dependencies first) ═══ -->
+  <script src="js/utils.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/share.js"></script>
+  <script src="js/invoice.js"></script>
+  <script src="js/customers.js"></script>
+  <script src="js/products.js"></script>
+  <script src="js/history.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
