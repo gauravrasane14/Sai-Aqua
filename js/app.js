@@ -73,6 +73,9 @@ const App = (() => {
       case 'invoice':
         await Invoice.renderCreateForm();
         break;
+      case 'invoice-view':
+        // Content rendered by Invoice.showInvoiceView()
+        break;
       case 'customers':
         await Customers.renderList();
         break;
@@ -164,7 +167,7 @@ const App = (() => {
       const customerName = inv.customerName || 'Unknown';
 
       return `
-        <div class="list-item" onclick="Invoice.viewInvoiceById(${inv.id})">
+        <div class="list-item" onclick="Invoice.viewInvoiceById(${inv.id}, 'dashboard')">
           <div class="item-avatar ${Utils.getAvatarColor(customerName)}">${Utils.getInitials(customerName)}</div>
           <div class="item-content">
             <div class="item-title">${invNum} — ${Utils.escapeHtml(customerName)}</div>

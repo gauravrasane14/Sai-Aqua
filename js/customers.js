@@ -260,15 +260,30 @@ const Customers = (() => {
       const statusText = inv.status === 'paid' ? 'Paid' : (inv.status === 'partial' ? 'Partial' : 'Unpaid');
 
       return `
-        <div class="list-item" onclick="Invoice.viewInvoiceById(${inv.id})">
-          <div class="item-avatar blue">📄</div>
-          <div class="item-content">
+        <div class="list-item" style="flex-wrap: wrap;">
+          <div class="item-avatar blue" style="align-self: flex-start;">📄</div>
+          <div class="item-content" onclick="Invoice.viewInvoiceById(${inv.id}, 'customers')" style="cursor: pointer;">
             <div class="item-title">${invNum}</div>
             <div class="item-subtitle">${Utils.formatDate(inv.date)}</div>
           </div>
           <div class="item-meta">
             <div class="item-amount">${Utils.formatCurrency(inv.subtotal)}</div>
             <span class="item-status ${statusClass}">${statusText}</span>
+          </div>
+          <!-- Quick Actions -->
+          <div style="width: 100%; display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 4px; margin-top: var(--space-sm);">
+            <button class="btn btn-sm btn-ghost" style="padding: 4px 6px; font-size: 11px;" onclick="event.stopPropagation(); Invoice.viewInvoiceById(${inv.id}, 'customers')">
+              👁️ View
+            </button>
+            <button class="btn btn-sm btn-secondary" style="padding: 4px 6px; font-size: 11px;" onclick="event.stopPropagation(); Invoice.downloadExistingPDF(${inv.id})">
+              ⬇️ PDF
+            </button>
+            <button class="btn btn-sm btn-secondary" style="padding: 4px 6px; font-size: 11px;" onclick="event.stopPropagation(); Invoice.saveExistingImage(${inv.id})">
+              💾 Image
+            </button>
+            <button class="btn btn-sm btn-ghost" style="padding: 4px 6px; font-size: 11px; color: var(--accent);" onclick="event.stopPropagation(); Invoice.shareExistingPDF(${inv.id})">
+              📤 Share
+            </button>
           </div>
         </div>
       `;

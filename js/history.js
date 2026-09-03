@@ -59,7 +59,7 @@ const History = (() => {
       html += `
         <div class="list-item" style="flex-wrap: wrap;">
           <div class="item-avatar blue" style="align-self: flex-start;">📄</div>
-          <div class="item-content" onclick="Invoice.viewInvoiceById(${inv.id})" style="cursor:pointer;">
+          <div class="item-content" onclick="Invoice.viewInvoiceById(${inv.id}, 'history')" style="cursor:pointer;">
             <div class="item-title">${invNum} — ${Utils.escapeHtml(customerName)}</div>
             <div class="item-subtitle">${Utils.formatDate(inv.date)}${inv.balanceDue > 0 ? ` • Balance: ${Utils.formatCurrency(inv.balanceDue)}` : ''}</div>
           </div>
@@ -67,16 +67,19 @@ const History = (() => {
             <div class="item-amount">${Utils.formatCurrency(inv.subtotal)}</div>
             <span class="item-status ${statusClass}">${statusText}</span>
           </div>
-          <!-- Share row -->
-          <div style="width:100%; display: flex; gap: var(--space-xs); margin-top: var(--space-sm); padding-left: 54px;">
-            <button class="btn btn-sm btn-ghost" style="flex:1; font-size: var(--font-xs);" onclick="event.stopPropagation(); Invoice.viewInvoiceById(${inv.id})">
-              👁 View
+          <!-- Action row with View, Download, and Share -->
+          <div style="width:100%; display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 4px; margin-top: var(--space-sm);">
+            <button class="btn btn-sm btn-ghost" style="padding: 4px 6px; font-size: 11px;" onclick="event.stopPropagation(); Invoice.viewInvoiceById(${inv.id}, 'history')">
+              👁️ View
             </button>
-            <button class="btn btn-sm btn-ghost" style="flex:1; font-size: var(--font-xs); color: var(--blue);" onclick="event.stopPropagation(); Invoice.shareExistingPDF(${inv.id})">
-              📄 PDF
+            <button class="btn btn-sm btn-secondary" style="padding: 4px 6px; font-size: 11px;" onclick="event.stopPropagation(); Invoice.downloadExistingPDF(${inv.id})">
+              ⬇️ PDF
             </button>
-            <button class="btn btn-sm btn-ghost" style="flex:1; font-size: var(--font-xs); color: var(--purple);" onclick="event.stopPropagation(); Invoice.shareExistingImage(${inv.id})">
-              🖼️ Image
+            <button class="btn btn-sm btn-secondary" style="padding: 4px 6px; font-size: 11px;" onclick="event.stopPropagation(); Invoice.saveExistingImage(${inv.id})">
+              💾 Image
+            </button>
+            <button class="btn btn-sm btn-ghost" style="padding: 4px 6px; font-size: 11px; color: var(--accent);" onclick="event.stopPropagation(); Invoice.shareExistingPDF(${inv.id})">
+              📤 Share
             </button>
           </div>
         </div>

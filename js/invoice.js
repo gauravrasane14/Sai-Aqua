@@ -548,31 +548,35 @@ const Invoice = (() => {
         <!-- Primary Share Actions -->
         <div class="success-share-actions">
           <button class="btn btn-share btn-share-pdf" onclick="Invoice.handleSharePDF()">
-            📄 &nbsp;SHARE PDF
+            📄 &nbsp;SHARE PDF (WhatsApp)
           </button>
           <button class="btn btn-share btn-share-img" onclick="Invoice.handleShareImage()">
-            🖼️ &nbsp;SHARE IMAGE
+            🖼️ &nbsp;SHARE IMAGE (WhatsApp)
           </button>
         </div>
 
-        <!-- Secondary Actions -->
-        <div class="success-secondary-actions">
-          <button class="btn btn-ghost btn-sm" onclick="Invoice.handleDownloadPDF()">
-            ⬇ PDF
+        <!-- Download Buttons (Prominent) -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-sm); width: 100%; margin-bottom: var(--space-md);">
+          <button class="btn btn-secondary btn-lg" onclick="Invoice.handleDownloadPDF()" style="font-size: var(--font-sm); font-weight: 700;">
+            ⬇️ Download PDF
           </button>
-          <button class="btn btn-ghost btn-sm" onclick="Invoice.handleSaveImage()">
-            💾 Image
-          </button>
-          <button class="btn btn-ghost btn-sm" onclick="Invoice.handlePrint()">
-            🖨 Print
+          <button class="btn btn-secondary btn-lg" onclick="Invoice.handleSaveImage()" style="font-size: var(--font-sm); font-weight: 700;">
+            💾 Download Image
           </button>
         </div>
 
-        <!-- View / New -->
-        <button class="btn btn-secondary btn-block" onclick="Invoice.handleViewInvoice()" style="margin-bottom: var(--space-md);">
-          👁 View Invoice
-        </button>
-        <button class="btn btn-primary btn-block" onclick="Invoice.renderCreateForm()">
+        <!-- Secondary Actions (View / Print) -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-sm); width: 100%; margin-bottom: var(--space-xl);">
+          <button class="btn btn-ghost" onclick="Invoice.handleViewInvoice()">
+            👁️ View Invoice
+          </button>
+          <button class="btn btn-ghost" onclick="Invoice.handlePrint()">
+            🖨️ Print
+          </button>
+        </div>
+
+        <!-- Create New -->
+        <button class="btn btn-primary btn-block btn-lg" onclick="Invoice.renderCreateForm()">
           ＋ Create Another Invoice
         </button>
       </div>
@@ -639,13 +643,21 @@ const Invoice = (() => {
     }
   }
 
+  let lastReturnScreen = 'history';
+
   function handleViewInvoice() {
     if (!currentInvoiceData) return;
-    showInvoiceView(currentInvoiceData);
+    showInvoiceView(currentInvoiceData, 'invoice');
   }
 
-  // ── View Invoice (in-app preview with share actions) ───────────
-  async function showInvoiceView(data) {
+  function closeInvoiceView() {
+    App.navigateTo(lastReturnScreen || 'history');
+  }
+
+  // ── View Invoice (in-app preview with share & download actions) ─
+  async function showInvoiceView(data, returnScreen = 'history') {
+    lastReturnScreen = returnScreen;
+
     // Load full data if needed
     if (!data.customerName && data.customerId) {
       const customer = await DB.getCustomer(data.customerId);
@@ -654,18 +666,18 @@ const Invoice = (() => {
       data.customerAddress = customer?.address || '';
     }
 
-    // Render the invoice HTML
+    // Render the invoice HTML into the off-screen canvas
     renderInvoiceHTML(data);
     currentInvoiceData = data;
     cachedPdfBlob = null;
     cachedPngBlob = null;
 
-    const screen = document.getElementById('screen-invoice');
+    const screen = document.getElementById('screen-invoice-view');
     const invNum = Utils.formatInvoiceNumber(data.invoiceNumber);
 
     screen.innerHTML = `
       <div class="sub-header">
-        <button class="back-btn" onclick="Invoice.renderCreateForm()">←</button>
+        <button class="back-btn" onclick="Invoice.closeInvoiceView()">←</button>
         <div>
           <h2 class="section-title">${invNum}</h2>
           <div class="section-subtitle">${Utils.escapeHtml(data.customerName)} • ${Utils.formatDate(data.date)}</div>
@@ -676,33 +688,82 @@ const Invoice = (() => {
         ${document.getElementById('invoice-canvas').outerHTML}
       </div>
 
-      <div class="invoice-view-actions">
+      <div class="invoice-view-actions" style="margin-top: var(--space-base);">
+        <!-- Primary Share Buttons -->
         <button class="btn btn-share btn-share-pdf" onclick="Invoice.handleSharePDF()">
-          📄 &nbsp;SHARE PDF
+          📄 &nbsp;SHARE PDF (WhatsApp)
         </button>
         <button class="btn btn-share btn-share-img" onclick="Invoice.handleShareImage()">
-          🖼️ &nbsp;SHARE IMAGE
+          🖼️ &nbsp;SHARE IMAGE (WhatsApp)
         </button>
-        <div class="action-row">
-          <button class="btn btn-ghost btn-sm" onclick="Invoice.handleDownloadPDF()">⬇ PDF</button>
-          <button class="btn btn-ghost btn-sm" onclick="Invoice.handleSaveImage()">💾 Image</button>
-          <button class="btn btn-ghost btn-sm" onclick="Invoice.handlePrint()">🖨 Print</button>
+
+        <!-- Direct Download Buttons -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-sm); margin-top: var(--space-xs);">
+          <button class="btn btn-secondary btn-lg" onclick="Invoice.handleDownloadPDF()" style="font-weight: 700;">
+            ⬇️ Download PDF
+          </button>
+          <button class="btn btn-secondary btn-lg" onclick="Invoice.handleSaveImage()" style="font-weight: 700;">
+            💾 Download Image
+          </button>
         </div>
+
+        <button class="btn btn-ghost btn-block" onclick="Invoice.handlePrint()" style="margin-top: var(--space-xs);">
+          🖨️ Print Invoice
+        </button>
       </div>
     `;
 
-    // Show invoice screen
-    App.navigateTo('invoice');
+    // Show dedicated invoice view screen without triggering form reset
+    App.navigateTo('invoice-view');
   }
 
   // ── View existing invoice by ID ────────────────────────────────
-  async function viewInvoiceById(invoiceId) {
+  async function viewInvoiceById(invoiceId, returnScreen = 'history') {
     const data = await DB.getInvoice(invoiceId);
     if (data) {
-      await showInvoiceView(data);
+      await showInvoiceView(data, returnScreen);
     } else {
       Utils.showToast('Invoice not found', 'error');
     }
+  }
+
+  // ── Direct Download helpers for existing invoices ──────────────
+  async function downloadExistingPDF(invoiceId) {
+    const data = await DB.getInvoice(invoiceId);
+    if (!data) { Utils.showToast('Invoice not found', 'error'); return; }
+
+    if (!data.customerName && data.customerId) {
+      const customer = await DB.getCustomer(data.customerId);
+      data.customerName = customer?.name || 'Unknown';
+      data.customerMobile = customer?.mobile || '';
+    }
+
+    renderInvoiceHTML(data);
+    currentInvoiceData = data;
+    cachedPdfBlob = null;
+    cachedPngBlob = null;
+
+    await new Promise(r => setTimeout(r, 50));
+    await handleDownloadPDF();
+  }
+
+  async function saveExistingImage(invoiceId) {
+    const data = await DB.getInvoice(invoiceId);
+    if (!data) { Utils.showToast('Invoice not found', 'error'); return; }
+
+    if (!data.customerName && data.customerId) {
+      const customer = await DB.getCustomer(data.customerId);
+      data.customerName = customer?.name || 'Unknown';
+      data.customerMobile = customer?.mobile || '';
+    }
+
+    renderInvoiceHTML(data);
+    currentInvoiceData = data;
+    cachedPdfBlob = null;
+    cachedPngBlob = null;
+
+    await new Promise(r => setTimeout(r, 50));
+    await handleSaveImage();
   }
 
   // ── Share existing invoice ─────────────────────────────────────
@@ -756,8 +817,11 @@ const Invoice = (() => {
     handleSaveImage,
     handlePrint,
     handleViewInvoice,
+    closeInvoiceView,
     showInvoiceView,
     viewInvoiceById,
+    downloadExistingPDF,
+    saveExistingImage,
     shareExistingPDF,
     shareExistingImage,
     renderInvoiceHTML,

@@ -1531,7 +1531,8 @@ input, select, textarea, button {
 .invoice-preview-container {
   background: #ffffff;
   border-radius: var(--radius-lg);
-  overflow: hidden;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   margin-bottom: var(--space-lg);
   box-shadow: var(--shadow-md);
 }
@@ -1539,6 +1540,22 @@ input, select, textarea, button {
 .invoice-preview-container .invoice-canvas {
   position: static;
   width: 100%;
+  max-width: 100%;
+  padding: 20px 16px;
+  box-sizing: border-box;
+}
+
+@media (max-width: 480px) {
+  .invoice-preview-container .invoice-canvas {
+    padding: 16px 12px;
+  }
+  .invoice-preview-container .invoice-canvas .inv-business-name {
+    font-size: 22px;
+  }
+  .invoice-preview-container .invoice-canvas .inv-meta-section {
+    flex-direction: column;
+    gap: 10px;
+  }
 }
 
 /* ── Login Overlay ────────────────────────────────────────────── */
